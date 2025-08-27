@@ -104,12 +104,8 @@
             margin-bottom: 20px;
             font-weight: 800;
             line-height: 1.2;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 50%, #e6f3ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            animation: titleGlow 3s ease-in-out infinite;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         @keyframes titleGlow {
@@ -844,13 +840,13 @@
             .case-button {
                 top: 10px;
                 right: 10px;
-                padding: 6px 12px;
-                font-size: 0.75rem;
+                padding: 8px 16px;
+                font-size: 0.9rem;
                 border-radius: 20px;
             }
             
             .case-button-icon {
-                font-size: 0.9rem;
+                font-size: 1.1rem;
             }
             
             /* 桌面端保持原有样式 */
@@ -932,19 +928,38 @@
             }
             
             .promise-text {
-                font-size: 0.8rem;
+                font-size: 1rem;
+                font-weight: 600;
             }
             
             /* 专业级展示包装区域响应式设计 */
             .display-areas {
-                grid-template-columns: 1fr;
-                gap: 15px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
                 margin: 20px 0;
             }
             
             .display-area {
                 aspect-ratio: 1;
-                min-height: 120px;
+                min-height: 100px;
+            }
+            
+            .content-icon {
+                font-size: 2.2rem;
+                margin-bottom: 8px;
+            }
+            
+            .content-text h4 {
+                font-size: 1.1rem;
+                margin-bottom: 6px;
+                line-height: 1.3;
+                font-weight: 600;
+            }
+            
+            .content-text p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+                margin: 0;
             }
             
             .placeholder-icon {
@@ -1015,20 +1030,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-content">
-                <div class="header-badge">🚀 AI驱动教育创新</div>
-                <h1>让每门课程都成为时代精品</h1>
-                <div class="header-subtitle">
-                    从传统教学到智能教育的华丽转身<br>
-                    用科技重新定义教育的无限可能
-                </div>
-                <div class="header-features">
-                    <div class="feature-tag">🎯 精准定制</div>
-                    <div class="feature-tag">⚡ 快速交付</div>
-                    <div class="feature-tag">🏆 获奖品质</div>
-                    <div class="feature-tag">📱 全端适配</div>
-                </div>
-            </div>
+            <h1>🎓 定制服务内容</h1>
+            <p>专业的数字化教育解决方案</p>
         </div>
 
         <div class="pricing-grid">
@@ -1577,22 +1580,249 @@
         </div>
 
         <script>
+            // ==================== 用户行为追踪系统 ====================
+            const UserTracker = {
+                sessionId: (crypto?.randomUUID?.() || Math.random().toString(36).slice(2)) + '-' + Date.now(),
+                startTime: Date.now(),
+                sectionTimes: {},
+                currentSection: null,
+                scrollDepth: 0,
+                maxScrollDepth: 0,
+                
+                // 初始化追踪
+                init() {
+                    this.trackPageLoad();
+                    this.trackScrollBehavior();
+                    this.trackSectionViewing();
+                    this.trackClicks();
+                    this.trackPageExit();
+                    this.getIPAddress();
+                },
+                
+                // 记录数据到localStorage
+                saveData(eventType, data) {
+                    const record = {
+                        sessionId: this.sessionId,
+                        timestamp: new Date().toISOString(),
+                        eventType: eventType,
+                        url: window.location.href,
+                        userAgent: navigator.userAgent,
+                        screenSize: `${screen.width}x${screen.height}`,
+                        viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+                        ...data
+                    };
+                    
+                    const existingData = JSON.parse(localStorage.getItem('clicklog_v1') || '[]');
+                    existingData.push(record);
+                    localStorage.setItem('clicklog_v1', JSON.stringify(existingData));
+                    
+                    // 发送到云端数据库
+                    this.sendToCloud(record);
+                },
+                
+                // 页面加载追踪
+                trackPageLoad() {
+                    this.saveData('page_load', {
+                        loadTime: Date.now() - performance.timing.navigationStart,
+                        referrer: document.referrer
+                    });
+                },
+                
+                // 滚动行为追踪
+                trackScrollBehavior() {
+                    let scrollTimeout;
+                    window.addEventListener('scroll', () => {
+                        const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+                        this.scrollDepth = scrollPercent;
+                        this.maxScrollDepth = Math.max(this.maxScrollDepth, scrollPercent);
+                        
+                        clearTimeout(scrollTimeout);
+                        scrollTimeout = setTimeout(() => {
+                            this.saveData('scroll', {
+                                scrollDepth: this.scrollDepth,
+                                maxScrollDepth: this.maxScrollDepth
+                            });
+                        }, 1000);
+                    });
+                },
+                
+                // 区域停留时间追踪
+                trackSectionViewing() {
+                    const sections = [
+                        { id: 'competition', element: document.querySelector('.pricing-card:nth-child(1)') },
+                        { id: 'course-upgrade', element: document.querySelector('.pricing-card:nth-child(2)') },
+                        { id: 'textbook', element: document.querySelector('.pricing-card:nth-child(3)') },
+                        { id: 'digital-textbook', element: document.querySelector('.pricing-card:nth-child(4)') }
+                    ];
+                    
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            const sectionId = entry.target.dataset.section;
+                            if (entry.isIntersecting) {
+                                this.enterSection(sectionId);
+                            } else {
+                                this.leaveSection(sectionId);
+                            }
+                        });
+                    }, { threshold: 0.5 });
+                    
+                    sections.forEach(section => {
+                        if (section.element) {
+                            section.element.dataset.section = section.id;
+                            observer.observe(section.element);
+                        }
+                    });
+                },
+                
+                // 进入区域
+                enterSection(sectionId) {
+                    if (this.currentSection) {
+                        this.leaveSection(this.currentSection);
+                    }
+                    this.currentSection = sectionId;
+                    this.sectionTimes[sectionId] = Date.now();
+                },
+                
+                // 离开区域
+                leaveSection(sectionId) {
+                    if (this.sectionTimes[sectionId]) {
+                        const duration = Date.now() - this.sectionTimes[sectionId];
+                        this.saveData('section_time', {
+                            section: sectionId,
+                            duration: duration,
+                            durationSeconds: Math.round(duration / 1000)
+                        });
+                        delete this.sectionTimes[sectionId];
+                    }
+                    if (this.currentSection === sectionId) {
+                        this.currentSection = null;
+                    }
+                },
+                
+                // 点击追踪
+                trackClicks() {
+                    document.addEventListener('click', (e) => {
+                        const target = e.target.closest('button, a, [data-track]');
+                        if (target) {
+                            this.saveData('click', {
+                                elementType: target.tagName.toLowerCase(),
+                                elementId: target.id || null,
+                                elementClass: target.className || null,
+                                elementText: target.innerText?.slice(0, 100) || null,
+                                dataTrack: target.getAttribute('data-track') || null,
+                                coordinates: { x: e.clientX, y: e.clientY }
+                            });
+                        }
+                    });
+                },
+                
+                // 页面退出追踪
+                trackPageExit() {
+                    window.addEventListener('beforeunload', () => {
+                        const totalTime = Date.now() - this.startTime;
+                        this.saveData('page_exit', {
+                            totalTimeOnPage: totalTime,
+                            totalTimeSeconds: Math.round(totalTime / 1000),
+                            maxScrollDepth: this.maxScrollDepth,
+                            currentSection: this.currentSection
+                        });
+                    });
+                },
+                
+                // 获取IP地址
+                async getIPAddress() {
+                    try {
+                        const response = await fetch('https://api.ipify.org?format=json');
+                        const data = await response.json();
+                        this.saveData('ip_info', { ip: data.ip });
+                    } catch (error) {
+                        console.log('无法获取IP地址');
+                    }
+                },
+                
+                // 发送数据到云端（多种方案）
+                async sendToCloud(record) {
+                    // 配置你的花生壳服务器地址
+                    const SERVER_URL = 'http://abc123456.vicp.fun'; // 替换为你的花生壳地址
+                    
+                    // 发送到你的服务器
+                    try {
+                        await fetch(`${SERVER_URL}/track`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(record),
+                            keepalive: true,
+                            mode: 'cors'
+                        });
+                        console.log('✅ 数据已发送到服务器');
+                    } catch (error) {
+                        console.log('❌ 服务器发送失败，数据已保存到本地:', error.message);
+                    }
+                },
+                
+                // 追踪弹窗行为
+                trackModal(modalType, action, duration = null) {
+                    this.saveData('modal_interaction', {
+                        modalType: modalType,
+                        action: action,
+                        duration: duration
+                    });
+                }
+            };
+            
+            // 初始化追踪系统
+            UserTracker.init();
+            
+            // 调试函数（开发用，生产环境可删除）
+            window.showStoredData = function() {
+                const data = JSON.parse(localStorage.getItem('clicklog_v1') || '[]');
+                console.log('📊 存储的用户行为数据:', data);
+                alert(`当前存储了 ${data.length} 条数据，请查看浏览器控制台获取详细信息`);
+            };
+            
+            window.clearStoredData = function() {
+                if (confirm('确定要清空所有数据吗？')) {
+                    localStorage.removeItem('clicklog_v1');
+                    console.log('🗑️ 数据已清空');
+                    alert('数据已清空');
+                }
+            };
+            
+            // ==================== 原有弹窗功能（增强版） ====================
+            let modalStartTime = null;
+            
             function openCaseModal() {
+                modalStartTime = Date.now();
                 document.getElementById('caseModal').style.display = 'block';
                 document.body.style.overflow = 'hidden';
+                UserTracker.trackModal('course_upgrade', 'open');
             }
 
             function closeCaseModal() {
+                if (modalStartTime) {
+                    const duration = Date.now() - modalStartTime;
+                    UserTracker.trackModal('course_upgrade', 'close', duration);
+                    modalStartTime = null;
+                }
                 document.getElementById('caseModal').style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
 
             function openDigitalModal() {
+                modalStartTime = Date.now();
                 document.getElementById('digitalModal').style.display = 'block';
                 document.body.style.overflow = 'hidden';
+                UserTracker.trackModal('digital_textbook', 'open');
             }
 
             function closeDigitalModal() {
+                if (modalStartTime) {
+                    const duration = Date.now() - modalStartTime;
+                    UserTracker.trackModal('digital_textbook', 'close', duration);
+                    modalStartTime = null;
+                }
                 document.getElementById('digitalModal').style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
@@ -1614,6 +1844,21 @@
                     closeCaseModal();
                     closeDigitalModal();
                 }
+            });
+            
+            // 添加data-track属性到重要元素
+            document.addEventListener('DOMContentLoaded', function() {
+                // 为案例按钮添加追踪属性
+                const caseButtons = document.querySelectorAll('.case-button');
+                caseButtons.forEach((btn, index) => {
+                    btn.setAttribute('data-track', `case-button-${index + 1}`);
+                });
+                
+                // 为特色标签添加追踪属性
+                const featureTags = document.querySelectorAll('.feature-tag');
+                featureTags.forEach((tag, index) => {
+                    tag.setAttribute('data-track', `feature-tag-${index + 1}`);
+                });
             });
         </script>
     </div>
