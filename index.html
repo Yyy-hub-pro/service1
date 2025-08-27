@@ -1398,7 +1398,7 @@
             <!-- 数字教材 -->
             <div class="pricing-card highlight">
                 <div class="mobile-case-button">
-                    <a href="http://47.94.171.205:11131/index.html#directory-section" class="case-button" target="_blank">
+                    <a href="#" class="case-button" onclick="openDigitalModal(); return false;">
                         <span class="case-button-icon">📋</span>
                         <span>实际案例</span>
                     </a>
@@ -1549,6 +1549,33 @@
             </div>
         </div>
 
+        <!-- 数字教材案例选择弹窗 -->
+        <div id="digitalModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeDigitalModal()">&times;</span>
+                <div class="modal-header">
+                    <div class="modal-title">💻 数字教材实际案例</div>
+                    <div class="modal-subtitle">请选择您想查看的案例类型</div>
+                </div>
+                <div class="case-options">
+                    <a href="http://47.94.171.205:11131/index.html#directory-section" class="case-option" target="_blank" onclick="closeDigitalModal()">
+                        <div class="case-option-icon">📚</div>
+                        <div class="case-option-content">
+                            <div class="case-option-title">图书馆学概论</div>
+                            <div class="case-option-desc">数字化教材的经典案例，展示互动式学习资源和现代化教学设计</div>
+                        </div>
+                    </a>
+                    <a href="http://47.94.171.205:11130/" class="case-option" target="_blank" onclick="closeDigitalModal()">
+                        <div class="case-option-icon">🧮</div>
+                        <div class="case-option-content">
+                            <div class="case-option-title">运筹学——匈牙利法</div>
+                            <div class="case-option-desc">优化算法的可视化教学案例，通过交互式演示理解复杂算法原理</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <script>
             function openCaseModal() {
                 document.getElementById('caseModal').style.display = 'block';
@@ -1560,11 +1587,24 @@
                 document.body.style.overflow = 'auto';
             }
 
+            function openDigitalModal() {
+                document.getElementById('digitalModal').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDigitalModal() {
+                document.getElementById('digitalModal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
             // 点击弹窗外部区域关闭弹窗
             window.onclick = function(event) {
-                const modal = document.getElementById('caseModal');
-                if (event.target === modal) {
+                const caseModal = document.getElementById('caseModal');
+                const digitalModal = document.getElementById('digitalModal');
+                if (event.target === caseModal) {
                     closeCaseModal();
+                } else if (event.target === digitalModal) {
+                    closeDigitalModal();
                 }
             }
 
@@ -1572,6 +1612,7 @@
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape') {
                     closeCaseModal();
+                    closeDigitalModal();
                 }
             });
         </script>
